@@ -88,7 +88,7 @@ test = ["pytest (>=6.2.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pr
 
 [[package]]
 name = "dirgh"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 category = "main"
 optional = true
@@ -103,7 +103,7 @@ trio = "^0.19.0"
 type = "git"
 url = "https://github.com/tiptenbrink/dirgh.git"
 reference = "main"
-resolved_reference = "97865fba8ba829cf1133b7ab7cd244939f6d5d86"
+resolved_reference = "bb98c6e975f0ac8ccd383d1b1fc8310200bcca7c"
 
 [[package]]
 name = "h11"

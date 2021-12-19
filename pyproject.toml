@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "psqlsync"
-version = "0.1.1"
+version = "0.1.2"
 description = "Tool to create basic PostgreSQL backups and restore them from local files."
 authors = ["Tip ten Brink <75669206+tiptenbrink@users.noreply.github.com>"]
 
