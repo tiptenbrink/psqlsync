@@ -37,7 +37,7 @@ def run():
                              help="Verbose output")
     cfg_pth_nm = 'config'
     args_parser.add_argument(f"--{cfg_pth_nm}",
-                             required=False,
+                             required=True,
                              help="Database configuration file path (.toml)")
     args = args_parser.parse_args()
     cli_args = vars(args)

@@ -20,8 +20,8 @@ def list_available_backups(storage_engine, manager_config):
 
             backup_list = os.listdir(backup_folder)
         except FileNotFoundError:
-            raise FileNotFoundError(f'Could not found {backup_folder} when searching for backups.'
-                                    f'Check your .config file settings')
+            raise FileNotFoundError(f'Could not find {backup_folder} when searching for backups.'
+                                    f'Check your config file settings')
     else:
         raise ValueError("Only 'LOCAL' storage engine is supported!")
 
@@ -135,9 +135,7 @@ def swap_after_restore(db_host, restore_database, new_active_database, db_port, 
     con = psycopg2.connect(dbname='postgres', port=db_port,
                            user=user_name, host=db_host,
                            password=user_password)
-    print(con)
-    print(restore_database)
-    print(new_active_database)
+
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = con.cursor()
     cur.execute("SELECT pg_terminate_backend( pid ) "
