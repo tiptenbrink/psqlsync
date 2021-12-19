@@ -1,0 +1,12 @@
+[setup]
+storage_engine= "LOCAL"
+
+[local_storage]
+path = "./backups/"
+
+[postgresql]
+host="<your_psql_addr(probably 127.0.0.1)>"
+port="<your_psql_port(probably 5432)>"
+db="<your_db_name>"
+user="<your_username>"
+password="<your_password>"
