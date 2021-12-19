@@ -7,7 +7,7 @@ import keyring
 from psqlsync.ghmoteqlync.download import prepare
 
 
-def run(owner, repo, repo_dir, app_name="psqlsync"):
+def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None):
     restore_app_name = f'ghmoteqlync-{app_name}'
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description="Download and restore test database.")
@@ -24,7 +24,7 @@ def run(owner, repo, repo_dir, app_name="psqlsync"):
                         action='store_true')
     cfg_pth_nm = 'config'
     parser.add_argument(f"--{cfg_pth_nm}",
-                        required=True,
+                        required=config_def is None, default=config_def,
                         help="Database configuration file path (.toml)")
     overwrite_nm = 'nooverwrite'
     overwrite_help = "Overwrite target directory."
