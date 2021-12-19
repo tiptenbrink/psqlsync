@@ -1,6 +1,7 @@
 from pathlib import Path
 from functools import partial
 import tempfile
+import logging
 
 import toml
 import trio
@@ -9,7 +10,12 @@ from dirgh import find_download
 import psqlsync.actions
 
 
-def prepare(target, owner, repo, repo_dir, overwrite, config, token):
+logger = logging.getLogger(__name__)
+
+
+def prepare(target, owner, repo, repo_dir, overwrite, config, token, verbose):
+    logger.info("Downloading backup files...")
+
     run = partial(find_download, owner, repo, repo_dir, target, overwrite=overwrite,
                   token=token)
     trio.run(run)
@@ -36,7 +42,8 @@ def prepare(target, owner, repo, repo_dir, overwrite, config, token):
                              postgres_port,
                              postgres_user,
                              postgres_password,
-                             restore_uncompressed, None, True)
+                             restore_uncompressed, verbose)
+    logger.info("Sync finished successfully.")
 
 
 def find_latest(target: str):

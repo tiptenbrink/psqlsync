@@ -1,13 +1,17 @@
 import os
 import argparse
 import getpass
+import logging
 
 import keyring
 
-from psqlsync.ghmoteqlync.download import prepare
+from psqlsync.ghmoteqlync.sync import prepare
 
 
-def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=None):
+logger = logging.getLogger(__name__)
+
+
+def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=None, verbose=True):
     restore_app_name = f'ghmoteqlync-{app_name}'
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description="Download and restore test database.")
@@ -55,4 +59,4 @@ def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=
         else:
             key_pass = config[token_nm]
 
-    prepare(config[target_nm], owner, repo, repo_dir, config[overwrite_nm], config[cfg_pth_nm], key_pass)
+    prepare(config[target_nm], owner, repo, repo_dir, config[overwrite_nm], config[cfg_pth_nm], key_pass, verbose)

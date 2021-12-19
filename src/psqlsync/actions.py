@@ -7,12 +7,10 @@ from psqlsync.lib import *
 __all__ = ['backup', 'restore']
 
 
-def backup(db_url, postgres_db, local_file_path, storage_engine, filename_compressed, manager_config, logger=None,
-           verbose=False):
-    if logger is None:
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
+
+def backup(db_url, postgres_db, local_file_path, storage_engine, filename_compressed, manager_config, verbose=False):
     logger.info('Backing up {} database to {}'.format(postgres_db, local_file_path))
     if verbose:
         logger.info(f"DB url: {db_url}")
@@ -36,10 +34,7 @@ def restore(time, restore_filename, storage_engine, manager_config, postgres_res
             postgres_port,
             postgres_user,
             postgres_password,
-            restore_uncompressed, logger=None, verbose=False):
-    if logger is None:
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
+            restore_uncompressed, verbose=False):
 
     try:
         os.remove(restore_filename)

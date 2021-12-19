@@ -82,7 +82,7 @@ def run():
     # backup task
     elif args.action == "backup":
         db_url = f'postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}'
-        act.backup(db_url, postgres_db, local_file_path, storage_engine, filename_compressed, manager_config, logger,
+        act.backup(db_url, postgres_db, local_file_path, storage_engine, filename_compressed, manager_config,
                    verbose)
     # restore task
     elif args.action == "restore":
@@ -95,7 +95,7 @@ def run():
                     postgres_port,
                     postgres_user,
                     postgres_password,
-                    restore_uncompressed, logger, verbose)
+                    restore_uncompressed, verbose)
     else:
         logger.warning("No valid argument was given.")
         logger.warning(args)
