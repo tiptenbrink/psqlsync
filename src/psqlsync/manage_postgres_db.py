@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import argparse
 import datetime
 import logging
@@ -6,62 +5,26 @@ import subprocess
 import os
 import shutil
 import tempfile
-from tempfile import mkstemp
+from pathlib import Path
 
 import configparser
 import gzip
-import boto3
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-
-# Amazon S3 settings.
-# AWS_ACCESS_KEY_ID  in ~/.aws/credentials
-# AWS_SECRET_ACCESS_KEY in ~/.aws/credentials
-
-
-def upload_to_s3(file_full_path, dest_file, manager_config):
-    """
-    Upload a file to an AWS S3 bucket.
-    """
-    s3_client = boto3.client('s3')
-    try:
-        s3_client.upload_file(file_full_path,
-                              manager_config.get('AWS_BUCKET_NAME'),
-                              manager_config.get('AWS_BUCKET_PATH') + dest_file)
-        os.remove(file_full_path)
-    except boto3.exceptions.S3UploadFailedError as exc:
-        print(exc)
-        exit(1)
-
-
-def download_from_s3(backup_s3_key, dest_file, manager_config):
-    """
-    Upload a file to an AWS S3 bucket.
-    """
-    s3_client = boto3.resource('s3')
-    try:
-        s3_client.meta.client.download_file(manager_config.get('AWS_BUCKET_NAME'), backup_s3_key, dest_file)
-    except Exception as e:
-        print(e)
-        exit(1)
 
 
 def list_available_backups(storage_engine, manager_config):
     key_list = []
     if storage_engine == 'LOCAL':
+        backup_folder = manager_config.get('LOCAL_BACKUP_PATH')
         try:
-            backup_folder = manager_config.get('LOCAL_BACKUP_PATH')
+
             backup_list = os.listdir(backup_folder)
         except FileNotFoundError:
-            print(f'Could not found {backup_folder} when searching for backups.'
-                  f'Check your .config file settings')
-            exit(1)
-    elif storage_engine == 'S3':
-        # logger.info('Listing S3 bucket s3://{}/{} content :'.format(aws_bucket_name, aws_bucket_path))
-        s3_client = boto3.client('s3')
-        s3_objects = s3_client.list_objects_v2(Bucket=manager_config.get('AWS_BUCKET_NAME'),
-                                               Prefix=manager_config.get('AWS_BUCKET_PATH'))
-        backup_list = [s3_content['Key'] for s3_content in s3_objects['Contents']]
+            raise FileNotFoundError(f'Could not found {backup_folder} when searching for backups.'
+                                    f'Check your .config file settings')
+    else:
+        raise ValueError("Only 'LOCAL' storage engine is supported!")
 
     for bckp in backup_list:
         key_list.append(bckp)
@@ -69,21 +32,17 @@ def list_available_backups(storage_engine, manager_config):
 
 
 def list_postgres_databases(host, database_name, port, user, password):
-    try:
-        process = subprocess.Popen(
-            ['psql',
-             '--dbname=postgresql://{}:{}@{}:{}/{}'.format(user, password, host, port, database_name),
-             '--list'],
-            stdout=subprocess.PIPE
-        )
-        output = process.communicate()[0]
-        if int(process.returncode) != 0:
-            print('Command failed. Return code : {}'.format(process.returncode))
-            exit(1)
-        return output
-    except Exception as e:
-        print(e)
-        exit(1)
+    process = subprocess.Popen(
+        ['psql',
+         '--dbname=postgresql://{}:{}@{}:{}/{}'.format(user, password, host, port, database_name),
+         '--list'],
+        stdout=subprocess.PIPE
+    )
+    output = process.communicate()[0]
+    if int(process.returncode) != 0:
+        raise ChildProcessError("psql --list failed. Return code : {}".format(process.returncode))
+
+    return output
 
 
 def backup_postgres_db(host, database_name, port, user, password, dest_file, verbose):
@@ -146,49 +105,6 @@ def extract_file(src_file):
     return extracted_file
 
 
-def remove_faulty_statement_from_dump(src_file):
-    temp_file, _ = tempfile.mkstemp()
-
-    try:
-        with open(temp_file, 'w+'):
-            process = subprocess.Popen(
-                ['pg_restore',
-                 '-l'
-                 '-v',
-                 src_file],
-                stdout=subprocess.PIPE
-            )
-            output = subprocess.check_output(('grep', '-v', '"EXTENSION - plpgsql"'), stdin=process.stdout)
-            process.wait()
-            if int(process.returncode) != 0:
-                print('Command failed. Return code : {}'.format(process.returncode))
-                exit(1)
-
-            os.remove(src_file)
-            with open(src_file, 'w+') as cleaned_dump:
-                subprocess.call(
-                    ['pg_restore',
-                     '-L'],
-                    stdin=output,
-                    stdout=cleaned_dump
-                )
-
-    except Exception as e:
-        print("Issue when modifying dump : {}".format(e))
-
-
-def change_user_from_dump(source_dump_path, old_user, new_user):
-    fh, abs_path = mkstemp()
-    with os.fdopen(fh, 'w') as new_file:
-        with open(source_dump_path) as old_file:
-            for line in old_file:
-                new_file.write(line.replace(old_user, new_user))
-    # Remove original file
-    os.remove(source_dump_path)
-    # Move new file
-    shutil.move(abs_path, source_dump_path)
-
-
 def restore_postgres_db(db_host, db, port, user, password, backup_file, verbose):
     """Restore postgres db from a file."""
     try:
@@ -222,7 +138,6 @@ def create_db(db_host, database, db_port, user_name, user_password):
         con = psycopg2.connect(dbname='postgres', port=db_port,
                                user=user_name, host=db_host,
                                password=user_password)
-
     except Exception as e:
         print(e)
         exit(1)
@@ -271,21 +186,23 @@ def move_to_local_storage(comp_file, filename_compressed, manager_config):
     shutil.move(comp_file, '{}{}'.format(manager_config.get('LOCAL_BACKUP_PATH'), filename_compressed))
 
 
-def main():
+def run():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     handler = logging.StreamHandler()
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    args_parser = argparse.ArgumentParser(description='Postgres database management')
+    args_parser = argparse.ArgumentParser(description='psqlsync')
     args_parser.add_argument("--action",
                              metavar="action",
                              choices=['list', 'list_dbs', 'restore', 'backup'],
+                             help="'list' (backups), 'list_dbs' (available dbs), 'restore' (requires --time), 'backup'",
                              required=True)
-    args_parser.add_argument("--date",
-                             metavar="YYYY-MM-dd",
-                             help="Date to use for restore (show with --action list)")
+    args_parser.add_argument("--time",
+                             metavar="YYYYMMdd-HHmmss",
+                             help="Time to use for restore (show with --action list). If unique, will smart match.\n"
+                                  "(If there's just one backup matching YYYMM, providing that is enough)")
     args_parser.add_argument("--dest-db",
                              metavar="dest_db",
                              default=None,
@@ -307,24 +224,20 @@ def main():
     postgres_restore = "{}_restore".format(postgres_db)
     postgres_user = config.get('postgresql', 'user')
     postgres_password = config.get('postgresql', 'password')
-    aws_bucket_name = config.get('S3', 'bucket_name')
-    aws_bucket_path = config.get('S3', 'bucket_backup_path')
     storage_engine = config.get('setup', 'storage_engine')
     timestr = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     filename = 'backup-{}-{}.dump'.format(timestr, postgres_db)
     filename_compressed = '{}.gz'.format(filename)
-    restore_filename = '/tmp/restore.dump.gz'
-    restore_uncompressed = '/tmp/restore.dump'
+    temp_dir = Path(tempfile.gettempdir()).absolute()
+    restore_filename = temp_dir.joinpath('restore.dump.gz')
+    restore_uncompressed = temp_dir.joinpath('restore.dump')
     local_storage_path = config.get('local_storage', 'path', fallback='./backups/')
 
     manager_config = {
-        'AWS_BUCKET_NAME': aws_bucket_name,
-        'AWS_BUCKET_PATH': aws_bucket_path,
-        'BACKUP_PATH': '/tmp/',
+        'BACKUP_PATH': temp_dir,
         'LOCAL_BACKUP_PATH': local_storage_path
     }
-
-    local_file_path = '{}{}'.format(manager_config.get('BACKUP_PATH'), filename)
+    local_file_path = manager_config.get('BACKUP_PATH').joinpath(filename)
 
     # list task
     if args.action == "list":
@@ -356,30 +269,27 @@ def main():
         logger.info("Backup complete")
         logger.info("Compressing {}".format(local_file_path))
         comp_file = compress_file(local_file_path)
+        logger.info(storage_engine)
         if storage_engine == 'LOCAL':
             logger.info('Moving {} to local storage...'.format(comp_file))
             move_to_local_storage(comp_file, filename_compressed, manager_config)
             logger.info("Moved to {}{}".format(manager_config.get('LOCAL_BACKUP_PATH'), filename_compressed))
-        elif storage_engine == 'S3':
-            logger.info('Uploading {} to Amazon S3...'.format(comp_file))
-            upload_to_s3(comp_file, filename_compressed, manager_config)
-            logger.info("Uploaded to {}".format(filename_compressed))
     # restore task
     elif args.action == "restore":
-        if not args.date:
-            logger.warn('No date was chosen for restore. Run again with the "list" '
-                        'action to see available restore dates')
+        if not args.time:
+            logger.warning('No date was chosen for restore. Run again with the "list" '
+                           'action to see available restore dates')
         else:
             try:
                 os.remove(restore_filename)
             except Exception as e:
                 logger.info(e)
             all_backup_keys = list_available_backups(storage_engine, manager_config)
-            backup_match = [s for s in all_backup_keys if args.date in s]
+            backup_match = [s for s in all_backup_keys if args.time in s]
             if backup_match:
                 logger.info("Found the following backup : {}".format(backup_match))
             else:
-                logger.error("No match found for backups with date : {}".format(args.date))
+                logger.error("No match found for backups with date : {}".format(args.time))
                 logger.info("Available keys : {}".format([s for s in all_backup_keys]))
                 exit(1)
 
@@ -388,10 +298,6 @@ def main():
                 shutil.copy('{}/{}'.format(manager_config.get('LOCAL_BACKUP_PATH'), backup_match[0]),
                             restore_filename)
                 logger.info("Fetch complete")
-            elif storage_engine == 'S3':
-                logger.info("Downloading {} from S3 into : {}".format(backup_match[0], restore_filename))
-                download_from_s3(backup_match[0], restore_filename, manager_config)
-                logger.info("Download complete")
 
             logger.info("Extracting {}".format(restore_filename))
             ext_file = extract_file(restore_filename)
@@ -435,9 +341,5 @@ def main():
                                postgres_password)
             logger.info("Database restored and active.")
     else:
-        logger.warn("No valid argument was given.")
-        logger.warn(args)
-
-
-if __name__ == '__main__':
-    main()
+        logger.warning("No valid argument was given.")
+        logger.warning(args)
