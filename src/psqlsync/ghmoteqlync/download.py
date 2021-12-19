@@ -19,7 +19,7 @@ def prepare(target, owner, repo, repo_dir, overwrite, config, token):
     restore_filename = temp_dir.joinpath('restore.dump.gz')
     manager_config = {
         'BACKUP_PATH': temp_dir,
-        'LOCAL_BACKUP_PATH': "backups/backend"
+        'LOCAL_BACKUP_PATH': target
     }
     cfg = toml.load(config)
     restore_uncompressed = temp_dir.joinpath('restore.dump')

@@ -7,7 +7,7 @@ import keyring
 from psqlsync.ghmoteqlync.download import prepare
 
 
-def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None):
+def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=None):
     restore_app_name = f'ghmoteqlync-{app_name}'
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description="Download and restore test database.")
@@ -34,7 +34,8 @@ def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None):
     target_nm = 'target'
     target_help = f"output directory. If requesting a directory, this will overwrite the directory name. By default, " \
                   f"the content will be placed in backups/{repo}"
-    parser.add_argument('-o', f'--{target_nm}', help=target_help, default=f"backups/{repo}", required=False)
+    target_default = target_def if target_def is not None else f"backups/{repo}"
+    parser.add_argument('-o', f'--{target_nm}', help=target_help, default=target_default, required=False)
 
     config = vars(parser.parse_args())
 
