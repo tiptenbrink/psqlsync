@@ -226,7 +226,7 @@ dirgh = ["dirgh"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "152bdff69bc8ae3fce23911ac1dc4e49c828df235b8c067020de9910db9d0a12"
+content-hash = "e00708443ad7dcf39b2f8f285db1b19f2354eec074dada0053b91c982a521470"
 
 [metadata.files]
 anyio = [
