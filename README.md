@@ -11,6 +11,17 @@ This was forked to create a more minimal and maintainable package for the specif
 ## Getting Started
 
 ### Setup
+
+This library requires the installation of a PostgreSQL client, as it runs pg_restore and pg_dump directly from the command line, as there are no Python bindings for these functions, unfortunately. Use the below instructions to install the PostgreSQL 14 client ([instructions from here](https://wiki.postgresql.org/wiki/Apt)).
+
+```shell
+sudo apt install curl ca-certificates gnupg
+curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+sudo apt update
+sudo apt install postgresql-client-14
+```
+
 //TODO upload to PyPI
 
 * Create configuration file (ie. sample.toml)
@@ -30,20 +41,19 @@ password="<your_password>"
 ```
 
 
-
 ### Usage
 
 * List databases on a postgresql server
 
-      pslsync --config sample.toml --action list_dbs --verbose true
+      psqlsync --config sample.toml --action list_dbs --verbose true
 
 * Create database backup and store it (based on config file details)
 
-      pslsync --config sample.toml --action backup --verbose true
+      psqlsync --config sample.toml --action backup --verbose true
 
 * List previously created database backups available on storage engine
 
-      pslsync --config sample.toml --action list --verbose true
+      psqlsync --config sample.toml --action list --verbose true
 
 * Restore previously created database backups available on storage engine (check available dates with *list* action, it matches the time string, so any unique part of the string suffices)
 
@@ -75,6 +85,7 @@ optional arguments:
 ### From Python
 
 The `backup` and `restore` action have been seperated into easily callable Python functions in `psqlsync.actions`. You can import this module and call these functions from your Python code.
+
 
 ## Authors
 

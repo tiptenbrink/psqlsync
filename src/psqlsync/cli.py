@@ -17,6 +17,7 @@ def run():
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    logger.info("Running psqlsync...")
     args_parser = argparse.ArgumentParser(description='psqlsync')
     args_parser.add_argument("--action",
                              metavar="action",
@@ -84,6 +85,7 @@ def run():
         db_url = f'postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}'
         act.backup(db_url, postgres_db, local_file_path, storage_engine, filename_compressed, manager_config,
                    verbose)
+        logger.info(f"Backup {filename_compressed} of {postgres_host}:{postgres_port}/{postgres_db} successful.")
     # restore task
     elif args.action == "restore":
         if not args.time:
@@ -96,6 +98,7 @@ def run():
                     postgres_user,
                     postgres_password,
                     restore_uncompressed, verbose)
+        logger.info(f"Restore of {filename_compressed} at {postgres_host}:{postgres_port}/{postgres_db} successful.")
     else:
         logger.warning("No valid argument was given.")
         logger.warning(args)
