@@ -41,7 +41,7 @@ def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=
 
     config = vars(parser.parse_args())
 
-    pass_key = f"{restore_app_name}_gh_token"
+    pass_key = f"{restore_app_name}_gh_token".replace('-', '_')
     pass_key_env = pass_key.upper()
     if config[input_token_nm]:
         key_pass = getpass.getpass("Input your token:\n")
