@@ -3,8 +3,6 @@ import argparse
 import getpass
 import logging
 
-import keyring
-
 from psqlsync.ghmoteqlync.sync import prepare
 
 
@@ -47,15 +45,11 @@ def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=
     pass_key_env = pass_key.upper()
     if config[input_token_nm]:
         key_pass = getpass.getpass("Input your token:\n")
-        keyring.set_password("system", pass_key, key_pass)
     else:
         if config[token_nm] is None:
-            key_pass = keyring.get_password("system", pass_key)
+            key_pass = os.environ.get(pass_key_env)
             if key_pass is None:
-                key_pass = os.environ.get(pass_key_env)
-                if key_pass is None:
-                    raise ValueError(f"Please supply token or set the {pass_key_env} environment variable!")
-                keyring.set_password("system", pass_key, key_pass)
+                raise ValueError(f"Please supply token or set the {pass_key_env} environment variable!")
         else:
             key_pass = config[token_nm]
 
