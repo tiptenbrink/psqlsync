@@ -12,10 +12,10 @@ This was forked to create a more minimal and maintainable package for the specif
 
 ### Setup
 
-This library requires the installation of a PostgreSQL client, as it runs pg_restore and pg_dump directly from the command line, as there are no Python bindings for these functions, unfortunately. Use the below instructions to install the PostgreSQL 14 client ([instructions from here](https://wiki.postgresql.org/wiki/Apt)).
+This library requires the installation of a PostgreSQL client, as it runs pg_restore and pg_dump directly from the command line, as there are no Python bindings for these functions, unfortunately. Use the below instructions to install the PostgreSQL 14 client ([instructions from here](https://wiki.postgresql.org/wiki/Apt)). Note that this installs some basic tools (see the first line of the shell below), replace them at your discretion if e.g. you don't want to bloat your container environment.
 
 ```shell
-sudo apt install curl ca-certificates gnupg
+sudo apt install curl ca-certificates gnupg lsb-release
 curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 sudo apt update
