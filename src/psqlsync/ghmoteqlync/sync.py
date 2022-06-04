@@ -2,8 +2,7 @@ from pathlib import Path
 from functools import partial
 import tempfile
 import logging
-
-import toml
+import tomli
 import trio
 from dirgh import find_download
 
@@ -27,7 +26,8 @@ def prepare(target, owner, repo, repo_dir, overwrite, config, token, verbose):
         'BACKUP_PATH': temp_dir,
         'LOCAL_BACKUP_PATH': target
     }
-    cfg = toml.load(config)
+    with open(config, "rb") as f:
+        cfg = tomli.load(f)
     restore_uncompressed = temp_dir.joinpath('restore.dump')
     postgresql_cfg = cfg.get('postgresql')
     postgres_host = postgresql_cfg.get('host')

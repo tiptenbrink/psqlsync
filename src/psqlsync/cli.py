@@ -3,8 +3,7 @@ import datetime
 import logging
 import tempfile
 from pathlib import Path
-
-import toml
+import tomli
 
 from psqlsync.lib import *
 import psqlsync.actions as act
@@ -42,7 +41,8 @@ def run():
                              help="Database configuration file path (.toml)")
     args = args_parser.parse_args()
     cli_args = vars(args)
-    cfg = toml.load(cli_args.get(cfg_pth_nm))
+    with open(cli_args.get(cfg_pth_nm), "rb") as f:
+        cfg = tomli.load(f)
 
     postgresql_cfg = cfg.get('postgresql')
     postgres_host = postgresql_cfg.get('host')

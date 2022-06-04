@@ -7,15 +7,16 @@ authors = ["Tip ten Brink <75669206+tiptenbrink@users.noreply.github.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 psycopg2-binary = "^2.9.2"
-toml = "^0.10.2"
+tomli = "^2.0.1"
 dirgh = { git = "https://github.com/tiptenbrink/dirgh.git", branch = "main", optional = true }
+trio = { version = "^0.20.0", optional = true }
 
 [tool.poetry.scripts]
 psqlsync = "psqlsync.cli:run"
 prep = "psqlsync.ghremote.cli:run"
 
 [tool.poetry.extras]
-dirgh = ["dirgh"]
+dirgh = ["dirgh", "trio"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
