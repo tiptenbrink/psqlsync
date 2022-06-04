@@ -191,7 +191,7 @@ You may use this code under the terms of the Apache License (2.0):
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2022 Tip ten Brink
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -205,7 +205,7 @@ You may use this code under the terms of the Apache License (2.0):
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This code builds upon previous effort by amon,
+This code builds upon previous effort by valferon,
 and is used under the following license (MIT License):
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
