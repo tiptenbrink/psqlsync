@@ -7,7 +7,6 @@ import gzip
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-
 __all__ = ['list_available_backups', 'list_postgres_databases', 'backup_postgres_db', 'compress_file', 'extract_file',
            'restore_postgres_db', 'move_to_local_storage', 'create_db', 'swap_after_restore']
 
@@ -65,6 +64,7 @@ def backup_postgres_db(db_url, dest_file, verbose):
         process = subprocess.Popen(
             ['pg_dump',
              f'--dbname={db_url}',
+             '-Fc',
              '-f', dest_file],
             stdout=subprocess.PIPE
         )
