@@ -41,6 +41,7 @@ def run(owner, repo, repo_dir, app_name="psqlsync", config_def=None, target_def=
 
     config = vars(parser.parse_args())
 
+    # GHMOTEQLYNC_<APP NAME>_GH_TOKEN
     pass_key = f"{restore_app_name}_gh_token".replace('-', '_')
     pass_key_env = pass_key.upper()
     if config[input_token_nm]:

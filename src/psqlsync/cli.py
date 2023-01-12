@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import getpass
 import logging
 import tempfile
 from pathlib import Path
@@ -39,6 +40,10 @@ def run():
     args_parser.add_argument(f"--{cfg_pth_nm}",
                              required=True,
                              help="Database configuration file path (.toml)")
+    prompt_pass_nm = 'prompt-pass'
+    args_parser.add_argument(f"--{prompt_pass_nm}",
+                             action='store_true',
+                             help="Show a password prompt instead of the password defined in the config.")
     args = args_parser.parse_args()
     cli_args = vars(args)
     with open(cli_args.get(cfg_pth_nm), "rb") as f:
@@ -50,7 +55,12 @@ def run():
     postgres_db = postgresql_cfg.get('db')
     postgres_restore = "{}_psqlsync_temp_restore".format(postgres_db)
     postgres_user = postgresql_cfg.get('user')
-    postgres_password = postgresql_cfg.get('password')
+
+    if cli_args.get(prompt_pass_nm):
+        postgres_password = getpass.getpass("Password for database: ")
+    else:
+        postgres_password = postgresql_cfg.get('password')
+
     storage_engine = cfg.get('setup').get('storage_engine')
     timestr = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     filename = 'backup-{}-{}.dump'.format(timestr, postgres_db)
