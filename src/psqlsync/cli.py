@@ -34,13 +34,14 @@ def run():
                              help="Name of the new restored database")
     verbose_nm = 'verbose'
     args_parser.add_argument(f"--{verbose_nm}",
-                             default=False,
+                             action='store_true',
                              help="Verbose output")
     cfg_pth_nm = 'config'
     args_parser.add_argument(f"--{cfg_pth_nm}",
                              required=True,
                              help="Database configuration file path (.toml)")
     prompt_pass_nm = 'prompt-pass'
+    prompt_pass_arg = prompt_pass_nm.replace('-', '_')
     args_parser.add_argument(f"--{prompt_pass_nm}",
                              action='store_true',
                              help="Show a password prompt instead of the password defined in the config.")
@@ -56,7 +57,7 @@ def run():
     postgres_restore = "{}_psqlsync_temp_restore".format(postgres_db)
     postgres_user = postgresql_cfg.get('user')
 
-    if cli_args.get(prompt_pass_nm):
+    if cli_args.get(prompt_pass_arg):
         postgres_password = getpass.getpass("Password for database: ")
     else:
         postgres_password = postgresql_cfg.get('password')

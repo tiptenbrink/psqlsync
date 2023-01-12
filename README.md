@@ -22,8 +22,6 @@ sudo apt update
 sudo apt install postgresql-client-14
 ```
 
-//TODO upload to PyPI
-
 * Create configuration file (ie. sample.toml)
 ```toml
 [setup]
@@ -43,30 +41,36 @@ password="<your_password>"
 
 ### Usage
 
-* List databases on a postgresql server
+* List databases on a PostgreSQL server
 
-      psqlsync --config sample.toml --action list_dbs --verbose true
+      psqlsync --config sample.toml --action list_dbs
 
 * Create database backup and store it (based on config file details)
 
-      psqlsync --config sample.toml --action backup --verbose true
+      psqlsync --config sample.toml --action backup --verbose
 
 * List previously created database backups available on storage engine
 
-      psqlsync --config sample.toml --action list --verbose true
+      psqlsync --config sample.toml --action list
 
 * Restore previously created database backups available on storage engine (check available dates with *list* action, it matches the time string, so any unique part of the string suffices)
 
-      pslsync --config sample.toml --action restore --date 20211219-14 --verbose true
+      pslsync --config sample.toml --action restore --date 2021
 
 * Restore previously created database backups into a new destination database
 
       pslsync --config sample.toml --action restore --date 20211219-14 --dest-db new_DB_name
 
+* Enter password in prompt, so it does not have to be stored in plaintext in the config file
+
+      pslsync --config sample.toml --action backup --prompt-pass
+      Password for database: 
+
 
 ### Command help
 ```
-usage: psqlsync [-h] --action action [--time YYYYMMdd-HHmmss] [--dest-db dest_db] [--verbose VERBOSE] [--config CONFIG]
+usage: psqlsync [-h] --action action [--time YYYYMMdd-HHmmss] [--dest-db dest_db] [--verbose] --config CONFIG
+                [--prompt-pass]
 
 psqlsync
 
@@ -74,15 +78,16 @@ optional arguments:
   -h, --help            show this help message and exit
   --action action       'list' (backups), 'list_dbs' (available dbs), 'restore' (requires --time), 'backup'
   --time YYYYMMdd-HHmmss
-                        Time to use for restore (show with --action list). 
-                        If unique, will smart match. (If there's just one backup matching YYYMM, providing that is enough)
+                        Time to use for restore (show with --action list). If unique, will smart match. (If
+                        there's just one backup matching YYYMM, providing that is enough)
   --dest-db dest_db     Name of the new restored database
-  --verbose VERBOSE     Verbose output
+  --verbose             Verbose output
   --config CONFIG       Database configuration file path (.toml)
+  --prompt-pass         Show a password prompt instead of the password defined in the config.
 ```
 
 
-### From Python
+### Run programmatically
 
 The `backup` and `restore` action have been seperated into easily callable Python functions in `psqlsync.actions`. You can import this module and call these functions from your Python code.
 
