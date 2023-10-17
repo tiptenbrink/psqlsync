@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "psqlsync"
-version = "0.2.2"
+version = "0.2.3"
 description = "Tool to create basic PostgreSQL backups and restore them from local files."
 authors = ["Tip ten Brink <75669206+tiptenbrink@users.noreply.github.com>"]
 readme = "README.md"
@@ -10,7 +10,7 @@ license = "Apache-2.0"
 python = "^3.9"
 psycopg2-binary = "^2.9.2"
 tomli = "^2.0.1"
-dirgh = { version = "^0.2.0", optional = true }
+dirgh = { version = ">= 0.2.0", optional = true }
 trio = { version = ">= 0.20.0, < 0.23.0", optional = true }
 
 [tool.poetry.scripts]
